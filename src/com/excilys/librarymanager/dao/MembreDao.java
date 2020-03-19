@@ -1,7 +1,9 @@
+package com.excilys.librarymanager.dao;
+
 import java.util.List;
 
 import com.excilys.librarymanager.exception.DaoException;
-import com.excilys.librarymanager.modele.Membre;
+import com.excilys.librarymanager.model.Membre;
 
 public interface MembreDao {
 	public List<Membre> getList() throws DaoException;

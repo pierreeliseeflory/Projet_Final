@@ -8,6 +8,7 @@ public class Emprunt {
 	private Livre livre;
 	private LocalDate dateEmprunt;
 	private LocalDate dateRetour;
+	
 	public Emprunt(int id, Membre membre, Livre livre, LocalDate dateEmprunt, LocalDate dateRetour) {
 		super();
 		this.id = id;
@@ -16,6 +17,13 @@ public class Emprunt {
 		this.dateEmprunt = dateEmprunt;
 		this.dateRetour = dateRetour;
 	}
+	
+	
+	public Emprunt() {
+		super();
+	}
+
+
 	public int getId() {
 		return id;
 	}

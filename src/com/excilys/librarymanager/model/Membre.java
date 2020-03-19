@@ -21,6 +21,10 @@ public class Membre {
 		this.abonnement = abonnement;
 	}
 
+	public Membre() {
+		super();
+	}
+
 	public int getId() {
 		return id;
 	}

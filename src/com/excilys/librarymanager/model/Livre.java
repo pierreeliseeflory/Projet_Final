@@ -15,6 +15,10 @@ public class Livre {
 		this.isbn = isbn;
 	}
 	
+	public Livre() {
+		super();
+	}
+
 	public int getId() {
 		return id;
 	}

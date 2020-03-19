@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.excilys.librarymanager.model.*;
+import com.excilys.librarymanager.model.Membre;
+import com.excilys.librarymanager.model.Subscription;
 
 class ModelTest {
 
@@ -22,7 +23,7 @@ class ModelTest {
 		String mail = "pierre-elisee.flory@ensta-paris.fr";
 		String phone = "0760934928";
 		Subscription subscription = Subscription.valueOf("VIP");
-		Membre myMember(id, name, firstName, adress, mail, phone, subscription);
+		Membre myMember = new Membre(id, name, firstName, adress, mail, phone, subscription);
 	}
 	public static void main(String[] args){
 	}
