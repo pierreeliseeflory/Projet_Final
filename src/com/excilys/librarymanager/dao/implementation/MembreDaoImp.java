@@ -10,41 +10,36 @@ import java.util.List;
 
 import com.excilys.librarymanager.exception.DaoException;
 import com.excilys.librarymanager.model.Membre;
-import com.excilys.librarymanager.model.Membre;
-import com.excilys.librarymanager.model.Membre;
-import com.excilys.librarymanager.model.Membre;
 import com.excilys.librarymanager.dao.MembreDao;
 import com.excilys.librarymanager.model.Subscription;
 import com.excilys.librarymanager.persistence.ConnectionManager;
 
 public class MembreDaoImp implements MembreDao{
+	
 	private static MembreDaoImp instance;
-	private MembreDaoImp() { }	
+	
+	private MembreDaoImp() {}
+
 	public static MembreDaoImp getInstance() {
 		if(instance == null) {
 			instance = new MembreDaoImp();
 		}
 		return instance;
 	}
-	
-//	private int id;
-//	private String nom;
-//	private String prenom;
-//	private String adresse;
-//	private String email;
-//	private String telephone;
-//	private Subscription abonnement;
-	
-	private static final String CREATE_QUERY = "INSERT INTO Membre (nom, prenom, adresse, email, telephone, abonnement) VALUES (?, ?, ?);";
-	private static final String SELECT_ONE_QUERY = "SELECT * FROM Membre WHERE id= ? ;";
-	private static final String SELECT_ALL_QUERY = "SELECT * FROM Membre;";
-	private static final String UPDATE_QUERY = "UPDATE Membre SET nom=?, prenom=?, adresse=?, email=?, telephone=?, abonnement=? WHERE id=?;";
-	private static final String DELETE_QUERY = "DELETE FROM Membre WHERE id=?;";
-	
+
+//	private static final String SELECT_ALL_QUERY = "SELECT * FROM membre ORDER BY id;";
+
+	private static final String SELECT_ALL_QUERY = "SELECT * FROM membre ORDER BY nom, prenom;";
+	private static final String SELECT_ONE_QUERY = "SELECT * FROM membre WHERE id= ? ;";
+	private static final String CREATE_QUERY = "INSERT INTO membre (nom, prenom, adresse, email, telephone, abonnement) VALUES (?, ?, ?, ?, ?, ?);";
+	private static final String UPDATE_QUERY = "UPDATE membre SET nom=?, prenom=?, adresse=?, email=?, telephone=?, abonnement=? WHERE id=?;";
+	private static final String DELETE_QUERY = "DELETE FROM membre WHERE id=?;";
+	private static final String COUNT_QUERY = "SELECT COUNT(id) AS count FROM membre";
+
 	@Override
 	public List<Membre> getList() throws DaoException{
 		List<Membre> membres = new ArrayList<>();
-		
+
 		try (
 				Connection connection = ConnectionManager.getConnection();
 				PreparedStatement statement = connection.prepareStatement(SELECT_ALL_QUERY);
@@ -59,16 +54,16 @@ public class MembreDaoImp implements MembreDao{
 			throw new DaoException("Probleme lors de la recuperation des Membres.");
 		}
 		return membres;
-				
+
 	}
-	
+
 	@Override
 	public Membre getById(int id) throws DaoException {
 		Membre membre = new Membre();
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet res = null;
-		
+
 		try {
 			connection = ConnectionManager.getConnection();
 			statement = connection.prepareStatement(SELECT_ONE_QUERY);
@@ -105,14 +100,14 @@ public class MembreDaoImp implements MembreDao{
 		}
 		return membre;
 	}
-	
+
 	@Override
-	public int create(String nom, String prenom, String adresse, String email, String telephone) throws DaoException {
+	public int create(String nom, String prenom, String adresse, String email, String telephone, Subscription subscription) throws DaoException {
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet res = null;
 		int id = -1;
-		
+
 		try {
 			connection = ConnectionManager.getConnection();
 			statement = connection.prepareStatement(CREATE_QUERY, Statement.RETURN_GENERATED_KEYS);
@@ -121,6 +116,7 @@ public class MembreDaoImp implements MembreDao{
 			statement.setString(3, adresse);
 			statement.setString(4, email);
 			statement.setString(5, telephone);
+			statement.setString(6, subscription.name());
 			statement.executeUpdate();
 			res = statement.getGeneratedKeys();
 			if (res.next()) {
@@ -150,7 +146,7 @@ public class MembreDaoImp implements MembreDao{
 		}
 		return id;
 	};
-	
+
 	@Override
 	public void update(Membre membre) throws DaoException {
 		Connection connection = null;
@@ -163,7 +159,8 @@ public class MembreDaoImp implements MembreDao{
 			statement.setString(3, membre.getAdresse());
 			statement.setString(4, membre.getEmail());
 			statement.setString(5, membre.gettelephone());
-			statement.setString(6, membre.getabonnement().toString());
+			statement.setString(6, membre.getabonnement().name());
+			statement.setInt(7, membre.getId());
 			statement.executeUpdate();
 			System.out.println("UPDATE: " + membre);
 		} catch (SQLException e){
@@ -181,7 +178,7 @@ public class MembreDaoImp implements MembreDao{
 			}
 		}
 	}
-	
+
 	@Override
 	public void delete(int id) throws DaoException {
 		Connection connection = null;
@@ -210,12 +207,43 @@ public class MembreDaoImp implements MembreDao{
 			}
 		}
 	}
-	
+
 	@Override
 	public int count() throws DaoException {
-		List<Membre> stocks = getList();
-		return stocks.size();
-  };
-	
-	
+		int nbMembres = 0;
+		try (
+				Connection connection = ConnectionManager.getConnection();
+				PreparedStatement statement = connection.prepareStatement(COUNT_QUERY);
+				ResultSet res = statement.executeQuery();
+				){ 
+			if(res.next() ) {
+				nbMembres = res.getInt("count");
+			}
+			System.out.println("COUNT: " + nbMembres);
+		} catch (SQLException e) {
+			throw new DaoException("Probleme lors du comptage des Membres.");
+		}
+		return nbMembres;
+	};
+
+	public static void main(String[] args) {
+		try {
+			MembreDaoImp daoImp = getInstance();
+			daoImp.getList();
+			String nom = "Flory";
+			String prenom = "Pierre-Elisée";
+			String adresse = "14 rue gavarnie";
+			String email = "jhvojho";
+			String telephone = "15465656";
+			Subscription subscription = Subscription.PREMIUM;
+			int id = daoImp.create(nom, prenom, adresse, email, telephone, subscription);
+			daoImp.getById(id);
+			Membre membre = new Membre(id, nom, prenom, adresse, email, "00000", Subscription.valueOf("VIP"));
+			daoImp.update(membre);
+			daoImp.delete(id);	
+			daoImp.count();
+		} catch (DaoException e) {
+			System.out.println("C'est la merde");
+		}
+	}
 }

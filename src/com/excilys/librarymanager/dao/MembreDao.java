@@ -4,11 +4,12 @@ import java.util.List;
 
 import com.excilys.librarymanager.exception.DaoException;
 import com.excilys.librarymanager.model.Membre;
+import com.excilys.librarymanager.model.Subscription;
 
 public interface MembreDao {
 	public List<Membre> getList() throws DaoException;
 	public Membre getById(int id) throws DaoException;
-	public int create(String nom, String prenom, String adresse, String email, String telephone) throws DaoException;
+	public int create(String nom, String prenom, String adresse, String email, String telephone, Subscription subscription) throws DaoException;
 	public void update(Membre membre) throws DaoException;
 	public void delete(int id) throws DaoException;
 	public int count() throws DaoException;
